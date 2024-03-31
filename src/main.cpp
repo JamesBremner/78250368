@@ -12,18 +12,46 @@ class cAgent
 public:
     std::string myID;
     std::vector<std::string> myTasks;
+    int myWorkDaysMax;
+    int myWorkDaysActual;
 
-    bool cando( const std::string& task )
+    cAgent()
+        : myWorkDaysActual(0)
     {
-        return std::find(
-            myTasks.begin(),myTasks.end(),
-            task )
-             != myTasks.end();
     }
+
+    bool cando(const std::string &task);
+
+    static cAgent *find(const std::string &id);
 };
 
 std::set<std::string> theTasks;
 std::vector<cAgent> theAgents;
+
+cAgent *cAgent::find(const std::string &id)
+{
+    int index = 0;
+    for (auto &a : theAgents)
+    {
+        if (a.myID == id)
+        {
+            return &theAgents[index];
+        }
+        index++;
+    }
+    return 0;
+}
+
+bool cAgent::cando(const std::string &task)
+{
+    if (std::find(
+            myTasks.begin(), myTasks.end(),
+            task) == myTasks.end())
+        return false;
+    if (myWorkDaysActual >= myWorkDaysMax)
+        return false;
+    return true;
+}
 
 void readfile()
 {
@@ -32,37 +60,58 @@ void readfile()
         throw std::runtime_error(
             "Cannot read input");
     std::string line;
+    enum class eSection
+    {
+        teachers,
+        subjects,
+        classes
+    } section;
     while (getline(ifs, line))
     {
         // std::cout << line << "\n";
 
-        if (line.find("id:") != -1)
+        if (line.find("const teachers") != -1)
+            section = eSection::teachers;
+        else if (line.find("const subjects") != -1)
+            section = eSection::subjects;
+        else if (line.find("const classes") != -1)
+            section = eSection::classes;
+
+        else if (line.find("id:") != -1)
         {
             int p = line.find("\"");
             int q = line.find("\"", p + 1);
             line = line.substr(p + 1, q - p - 1);
-            if (line[0] == 'T')
+            switch (section)
             {
+            case eSection::teachers:
                 cAgent A;
                 A.myID = line;
                 theAgents.push_back(A);
+                break;
             }
+        }
+        else if (line.find("workDays:") != -1)
+        {
+            int p = line.find(":");
+            theAgents.back().myWorkDaysMax = atoi(line.substr(p + 2).c_str());
         }
         else if (line.find("subjects:") != -1)
         {
-            int p = line.find("\"", p + 1);
-            while (p != -1)
+            if (section == eSection::teachers)
             {
-                int q = line.find("\"", p + 1);
-                auto task = line.substr(p + 1, q - p - 1);
-                theTasks.insert(task);
-                theAgents.back().myTasks.push_back(task);
+                int p = line.find("\"", p + 1);
+                while (p != -1)
+                {
+                    int q = line.find("\"", p + 1);
+                    auto task = line.substr(p + 1, q - p - 1);
+                    theTasks.insert(task);
+                    theAgents.back().myTasks.push_back(task);
 
-                p = line.find("\"", q + 1);
+                    p = line.find("\"", q + 1);
+                }
             }
         }
-        else if (line.find("const subjects") != -1)
-            break;
     }
     std::cout << "Teachers:\n ";
     for (auto &a : theAgents)
@@ -76,37 +125,46 @@ void readfile()
 
 void allocateMaxFlow()
 {
-    raven::graph::cGraph g;
 
-    g.directed();
-
-    // loop over the tasks in timeslot
-    for (auto & task : theTasks)
+    // loop over weekdays
+    for (int day = 0; day < 6; day++)
     {
-        // loop over agents that can do task
-        for (cAgent &a : theAgents)
+        raven::graph::cGraph g;
+        g.directed();
+        
+        // loop over the tasks
+        for (auto &task : theTasks)
         {
-            if( ! a.cando( task ))
-                continue;
+            // loop over agents
+            for (cAgent &a : theAgents)
+            {
+                // check teacher can teach this subject
+                if (!a.cando(task))
+                    continue;
 
-            // add link from agent to task agent is able to do
-            g.add(
-                a.myID,
-                task );
+                // add link from agent to task agent is able to do
+                g.add(
+                    a.myID,
+                    task);
+            }
         }
-    }
 
-    // apply pathfinder maximum flow allocation algorithm 
-    raven::graph::sGraphData gd;
-    gd.g = g;
-    auto sg = alloc(gd);
+        // apply pathfinder maximum flow allocation algorithm
+        raven::graph::sGraphData gd;
+        gd.g = g;
+        auto sg = alloc(gd);
 
-    std::cout << "\nAssignments:\n";
-    for (std::pair<int, int> p : sg.edgeList())
-    {
-        std::cout << "teacher " << sg.userName(p.first )
-            << " assigned to " << sg.userName (p.second)
-            << "\n";
+        const std::vector<std::string> daynames{"Sat", "Sun", "Mon", "Tue", "Wed", "Thr"};
+        std::cout << "\nAssignments for " << daynames[day] << ":\n";
+        for (std::pair<int, int> p : sg.edgeList())
+        {
+            auto teacherID = sg.userName(p.first);
+            auto *pt = cAgent::find(teacherID);
+            pt->myWorkDaysActual++;
+            std::cout << "teacher " << teacherID
+                      << " assigned to " << sg.userName(p.second)
+                      << "\n";
+        }
     }
 }
 main()
