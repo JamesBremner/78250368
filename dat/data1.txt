@@ -1,0 +1,243 @@
+const teachers = [
+  {
+    name: "Math-Teacher",
+    id: "T1",
+    workDays: 6,
+    subjects: ["M1", "M2", "M3"],
+  },
+  {
+    name: "Quilting-Teacher",
+    id: "T2",
+    workDays: 2,
+    subjects: ["Q1", "Q2", "Q3"],
+  },
+  {
+    name: "Italian-Teacher",
+    id: "T3",
+    workDays: 6,
+    subjects: ["I1", "I2", "I3"],
+  },
+  {
+    name: "Biology-Teacher",
+    id: "T4",
+    workDays: 4,
+    subjects: ["B1", "B2", "B3"],
+  },
+  {
+    name: "history-Teacher",
+    id: "T5",
+    workDays: 2,
+    subjects: ["H1"],
+  },
+  {
+    name: "Phasics-Teacher",
+    id: "T6",
+    workDays: 5,
+    subjects: ["P1", "P2", "P3"],
+  },
+  {
+    name: "Italian-Teacher",
+    id: "T7",
+    workDays: 3,
+    subjects: ["I1", "I2", "I3"],
+  },
+  {
+    name: "Chemistry-Teacher",
+    id: "T8",
+    workDays: 3,
+    subjects: ["C1", "C2", "C3"],
+  },
+  {
+    name: "English-Teacher",
+    id: "T9",
+    workDays: 4,
+    subjects: ["M1"],
+  },
+  {
+    name: "Arabic-Teacher",
+    id: "T10",
+    workDays: 6,
+    subjects: ["A1", "A2"],
+  },
+];
+
+const subjects = [
+  //1-sec subjects
+  {
+    name: "Math",
+    class: "1-sec",
+    id: "M1",
+    weeklyLectures: 7,
+  },
+  {
+    name: "Biology",
+    class: "1-sec",
+    id: "B1",
+    weeklyLectures: 4,
+  },
+  {
+    name: " Quilting",
+    class: "1-sec",
+    id: "Q1",
+    weeklyLectures: 3,
+  },
+  {
+    name: "Isramic Culture",
+    class: "1-sec",
+    id: "I1",
+    weeklyLectures: 3,
+  },
+  {
+    name: "Phasics",
+    class: "1-sec",
+    id: "P1",
+    weeklyLectures: 5,
+  },
+  {
+    name: "History",
+    class: "1-sec",
+    id: "H1",
+    weeklyLectures: 3,
+  },
+  {
+    name: "English",
+    class: "1-sec",
+    id: "E1",
+    weeklyLectures: 5,
+  },
+  {
+    name: "Arabic",
+    class: "1-sec",
+    id: "A1",
+    weeklyLectures: 6,
+  },
+  {
+    name: "Chemistry",
+    class: "1-sec",
+    id: "C1",
+    weeklyLectures: 3,
+  },
+
+  //2-sec subjects
+  {
+    name: "Math",
+    class: "2-sec",
+    id: "M2",
+    weeklyLectures: 7,
+  },
+  {
+    name: "Biology",
+    class: "2-sec",
+    id: "B2",
+    weeklyLectures: 4,
+  },
+  {
+    name: " Quilting",
+    class: "2-sec",
+    id: "Q2",
+    weeklyLectures: 3,
+  },
+  {
+    name: "Isramic Culture",
+    class: "2-sec",
+    id: "I2",
+    weeklyLectures: 3,
+  },
+  {
+    name: "Phasics",
+    class: "2-sec",
+    id: "P2",
+    weeklyLectures: 5,
+  },
+  {
+    name: "English",
+    class: "2-sec",
+    id: "E2",
+    weeklyLectures: 5,
+  },
+  {
+    name: "Arabic",
+    class: "2-sec",
+    id: "A2",
+    weeklyLectures: 6,
+  },
+  {
+    name: "Chemistry",
+    class: "2-sec",
+    id: "C2",
+    weeklyLectures: 3,
+  },
+
+  //3-sec subjects
+  {
+    name: "Math",
+    class: "3-sec",
+    id: "M3",
+    weeklyLectures: 7,
+  },
+  {
+    name: "Biology",
+    class: "3-sec",
+    id: "B3",
+    weeklyLectures: 4,
+  },
+  {
+    name: " Quilting",
+    class: "3-sec",
+    id: "Q3",
+    weeklyLectures: 3,
+  },
+  {
+    name: "Isramic Culture",
+    class: "3-sec",
+    id: "I3",
+    weeklyLectures: 3,
+  },
+  {
+    name: "Phasics",
+    class: "3-sec",
+    id: "P3",
+    weeklyLectures: 5,
+  },
+  {
+    name: "English",
+    class: "3-sec",
+    id: "E3",
+    weeklyLectures: 5,
+  },
+  {
+    name: "Arabic",
+    class: "3-sec",
+    id: "A3",
+    weeklyLectures: 6,
+  },
+  {
+    name: "Chemistry",
+    class: "3-sec",
+    id: "C3",
+    weeklyLectures: 3,
+  },
+];
+
+const classes = [
+  {
+    name: "1-secondary",
+    id: "1-sec",
+    DailyLectures: 7,
+    subjects: ["M1", "Q1", "I1", "A1", "E1", "H1", "C1", "B1", "P1"],
+  },
+  {
+    name: "2-secondary",
+    id: "2-sec",
+    DailyLectures: 7,
+    subjects: ["M2", "Q2", "I2", "A2", "E2", "C2", "B2", "P2"],
+  },
+  {
+    name: "3-secondary",
+    id: "3-sec",
+    DailyLectures: 7,
+    subjects: ["M3", "Q3", "I3", "A3", "E3", "C3", "B3", "P3"],
+  },
+];
+
+const daysOfWeek = ["Sat", "Sun", "Mon", "Tue", "Wed", "Thr"];
