@@ -7,20 +7,31 @@
 #include <algorithm>
 #include "GraphTheory.h"
 
+/// @brief A teacher == an agent that can be assigned to tasks
 class cAgent
 {
 public:
     std::string myID;
-    std::vector<std::string> myTasks;
-    int myWorkDaysMax;
-    int myWorkDaysActual;
+    std::vector<std::string> myTasks;       // tasks ID that this agent can be assigned to
+    int myWorkDaysMax;                      // Specified in input - no explanation fo what it does
+    int myWorkDaysActual;                   // number of scheduled days worked in a week
+    bool myAvailable[6];                    // days of the week ( Sat = 0 ) when agent can be assigned
 
     cAgent()
         : myWorkDaysActual(0)
     {
+        for( int d = 0; d < 6; d++ )
+            myAvailable[d] = true;
     }
 
-    bool cando(const std::string &task);
+    /// @brief true if agent can be assigned to a task
+    /// @param task 
+    /// @param day of week ( Sat = 0 )
+    /// @return true if agent can be assigned to a task
+
+    bool cando(
+        const std::string &task,
+        int day );
 
     static cAgent *find(const std::string &id);
 };
@@ -42,14 +53,21 @@ cAgent *cAgent::find(const std::string &id)
     return 0;
 }
 
-bool cAgent::cando(const std::string &task)
+bool cAgent::cando(
+    const std::string &task,
+    int day )
 {
+    if( ! myAvailable[day]  )
+        return false;
+
     if (std::find(
             myTasks.begin(), myTasks.end(),
             task) == myTasks.end())
         return false;
-    if (myWorkDaysActual >= myWorkDaysMax)
-        return false;
+
+    // if (myWorkDaysActual >= myWorkDaysMax)
+    //     return false;
+
     return true;
 }
 
@@ -96,6 +114,29 @@ void readfile()
             int p = line.find(":");
             theAgents.back().myWorkDaysMax = atoi(line.substr(p + 2).c_str());
         }
+
+        else if (line.find("unavailableDays:") != -1)
+        {
+            int p = line.find("'");
+            while ( p != -1 ) {
+                auto day = line.substr(p+1,3);
+                int iday;
+                if( day == "Sat")
+                    iday = 0;
+                else if( day == "Sun")
+                    iday = 1;
+                else if( day == "Mon")
+                    iday = 2;
+                else if( day == "Tue")
+                    iday = 3;
+                else if( day == "Wed")
+                    iday = 4;
+                else if( day == "Thr")
+                    iday = 5;
+                theAgents.back().myAvailable[iday] = false;
+                p = line.find("'",p+5);
+            }
+        }
         else if (line.find("subjects:") != -1)
         {
             if (section == eSection::teachers)
@@ -131,7 +172,7 @@ void allocateMaxFlow()
     {
         raven::graph::cGraph g;
         g.directed();
-        
+
         // loop over the tasks
         for (auto &task : theTasks)
         {
@@ -139,7 +180,7 @@ void allocateMaxFlow()
             for (cAgent &a : theAgents)
             {
                 // check teacher can teach this subject
-                if (!a.cando(task))
+                if (!a.cando(task,day))
                     continue;
 
                 // add link from agent to task agent is able to do
