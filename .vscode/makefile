@@ -15,24 +15,25 @@ static_link_flags = -static-libstdc++ -static-libgcc -static -lComctl32
 # folders
 ODIR = ./.vscode/obj
 
-OPT = -g
+OPT = -O2
 CCflags = -std=c++17 $(OPT) -D_mingw_
 
 # sources
 OBJ_starter = \
 	$(ODIR)/main.o \
-		$(ODIR)/cGraph.o \
+	$(ODIR)/schoolify.o \
+	$(ODIR)/cGraph.o \
 	$(ODIR)/GraphTheory.o \
 
 ### COMPILE
 
-$(ODIR)/%.o: %.cpp  
+$(ODIR)/%.o: %.cpp schoolify.h
 	g++ $< \
 	-c -o $@  $(INCS) $(CCflags)
 
 starter: $(OBJ_starter)
 	g++ $(OPT) \
-	-o bin/starter.exe $^  \
+	-o bin/schoolify.exe $^  \
 	$(static_link_flags) $(LIBS)
 
 .PHONY: clean
