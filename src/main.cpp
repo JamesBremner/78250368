@@ -5,7 +5,7 @@
 #include <vector>
 #include <set>
 #include <algorithm>
-#include "GraphTheory.h"
+
 
 #include "schoolify.h"
 
@@ -15,6 +15,8 @@ main()
 {
     readfile();
     cAgent::display();
-    allocateMaxFlow();
+    AllocateSubjectsDays();
+    AllocateTeachersToSubjects();
+    displayAssigns();
     return 0;
 }
