@@ -44,7 +44,6 @@ public:
 
     int totalLectures() const;
 
-
     std::string ID() const
     {
         return myID;
@@ -101,13 +100,26 @@ public:
     static void sort();
 };
 
+struct cAssign
+{
+    std::string Teacher;
+    std::string Subject;
+
+    cAssign(
+        const std::string &t,
+        const std::string &s)
+        : Teacher(t),
+          Subject(s)
+    {
+    }
+};
+
 struct sDataStore
 {
-    std::set<std::string> Tasks;
     std::vector<cAgent> Agents;
     std::vector<cSubject> Subjects;
     std::vector<std::vector<std::string>> SubjectsPerDay;
-    std::vector<std::vector<std::pair<std::string, std::string>>> AssignsPerDay;
+    std::vector<std::vector<cAssign>> AssignsPerDay;
     std::vector<std::string> daynames{"Sat", "Sun", "Mon", "Tue", "Wed", "Thr"};
 };
 

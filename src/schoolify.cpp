@@ -31,7 +31,6 @@ bool cAgent::parseSubjects(
     {
         int q = line.find("\"", p + 1);
         auto task = line.substr(p + 1, q - p - 1);
-        theDataStore.Tasks.insert(task);
         myTasks.push_back(task);
 
         p = line.find("\"", q + 1);
@@ -475,8 +474,8 @@ void AllocateTeachersToSubjects()
                 continue;
             }
 
-            theDataStore.AssignsPerDay[day].push_back(
-                std::make_pair(pbest->ID(), s));
+            theDataStore.AssignsPerDay[day].emplace_back(
+                pbest->ID(), s);
 
             pbest->incDaysWorked(day);
         }
@@ -488,8 +487,8 @@ void AllocateTeachersToSubjects()
                 std::cout << "\n";
                 c = 0;
             }
-            std::cout << va.first
-                      << " assigned " << va.second
+            std::cout << va.Teacher
+                      << " assigned " << va.Subject
                       << ", ";
             c++;
         }
