@@ -1,5 +1,5 @@
 #source file search paths
-VPATH = ./src ../PathFinder/src
+VPATH = ./src 
 
 	# compiler include search paths
 INCS = -I./include \
@@ -22,8 +22,6 @@ CCflags = -std=c++17 $(OPT) -D_mingw_
 OBJ_starter = \
 	$(ODIR)/main.o \
 	$(ODIR)/schoolify.o \
-	$(ODIR)/cGraph.o \
-	$(ODIR)/GraphTheory.o \
 
 ### COMPILE
 

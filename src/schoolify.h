@@ -127,11 +127,7 @@ extern sDataStore theDataStore;
 
 void readfile();
 
-void allocateMaxFlow();
-
 void AllocateSubjectsDays();
-
-void allocateTeachers();
 
 void AllocateTeachersToSubjects();
 
