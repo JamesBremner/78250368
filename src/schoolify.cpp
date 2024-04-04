@@ -284,35 +284,16 @@ void AllocateSubjectsDays()
 
     theDataStore.SubjectsPerDay.clear();
     theDataStore.SubjectsPerDay.resize(6, std::vector<std::string>(0));
-    // for (auto &s : theDataStore.Subjects)
-    // {
-    //     for (int l = 0; l < s.weeklyLectures(); l++)
-    //     {
-    //         int minday = 0;
-    //         int minl = theDataStore.SubjectsPerDay[0].size();
-    //         for (int day = 0; day < 6; day++)
-    //         {
-    //             int sz = theDataStore.SubjectsPerDay[day].size();
-    //             if (sz < minl)
-    //             {
-    //                 minl = sz;
-    //                 minday = day;
-    //             }
-    //         }
-    //         theDataStore.SubjectsPerDay[minday].push_back(s.ID());
-    //     }
-    // }
 
-    // for (auto &s : theDataStore.Subjects)
-    //     std::cout << s.ID() << " ";
-    // std::cout << "\n";
-
+    // loop over the subjects
     for (auto iterS = theDataStore.Subjects.begin();
          iterS != theDataStore.Subjects.end();
          iterS++)
     {
+        // loop until all lectures in this subject are assigned to a day
         while (iterS->WeeklyUnassigned())
         {
+            // round robin: assign lectures to day with fewest lectures so far
             int minday = 0;
             int minl = theDataStore.SubjectsPerDay[0].size();
             for (int day = 0; day < 6; day++)
@@ -325,6 +306,7 @@ void AllocateSubjectsDays()
                 }
             }
 
+            // assign up to maximum number of lectures
             int lmax = iterS->WeeklyUnassigned();
             if (lmax > maxSubjectPerDay)
                 lmax = maxSubjectPerDay;
@@ -353,11 +335,14 @@ void AllocateTeachersToSubjects()
 {
     theDataStore.AssignsPerDay.clear();
     theDataStore.AssignsPerDay.resize(6);
+
+    // loop over the days
     for (int day = 0; day < 6; day++)
     {
         std::cout << "\n"
                   << theDataStore.daynames[day] << ":\n";
 
+        // loop over the subjects assigned to this day
         std::vector<std::string> vUnassigned;
         for (auto &s : theDataStore.SubjectsPerDay[day])
         {
@@ -382,15 +367,19 @@ void AllocateTeachersToSubjects()
             }
             if (bestWorkload.first == INT_MAX)
             {
+                // no teacher could be assigned
                 vUnassigned.push_back(s);
                 continue;
             }
 
+            // assign the teacher with the least workload
             theDataStore.AssignsPerDay[day].emplace_back(
                 pbest->ID(), s);
 
             pbest->incDaysWorked(day);
         }
+
+        // display results
         int c = 0;
         for (auto &va : theDataStore.AssignsPerDay[day])
         {
@@ -404,6 +393,9 @@ void AllocateTeachersToSubjects()
                       << ", ";
             c++;
         }
+
+        // if possible, postpone subjects that were not assigned
+        // to the next day
         if (vUnassigned.size())
         {
             // std::cout << "\nUnassigned: ";
