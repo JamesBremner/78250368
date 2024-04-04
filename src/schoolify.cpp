@@ -94,16 +94,15 @@ cAgent *cAgent::find(const std::string &id)
 }
 
 bool cAgent::cando(
-    int &daysWorked,
-    int &lecturesToday,
+    std::pair<int,int>& workload,
     const std::string &task,
     int day)
 {
-    daysWorked = ActualDaysWorked();
-    lecturesToday = myWorkDaysActual[day];
+    workload.first = ActualDaysWorked();
+    workload.second = myWorkDaysActual[day];
 
-    if (daysWorked >= myWorkDaysMax &&
-        lecturesToday == 0)
+    if (workload.first >= myWorkDaysMax &&
+        workload.second == 0)
         return false;
 
     if (!myAvailable[day])
@@ -355,7 +354,7 @@ void AllocateTeachersToSubjects()
             {
                 std::pair<int, int> workload;
                 if (!t.cando(
-                        workload.first, workload.second,
+                        workload,
                         s, day))
                     continue;
                 if (workload.first >= bestWorkload.first)

@@ -25,13 +25,13 @@ public:
         const std::string &line);
 
     /// @brief true if agent can be assigned to a task
+    /// @param[out] workload agent's days worked and lectures today
     /// @param task
     /// @param day of week ( Sat = 0 )
     /// @return true if agent can be assigned to a task
 
     bool cando(
-        int &daysWorked,
-        int &lecturesToday,
+        std::pair<int,int>& workload,
         const std::string &task,
         int day);
 
