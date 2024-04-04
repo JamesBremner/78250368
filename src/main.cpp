@@ -14,9 +14,9 @@ sDataStore theDataStore;
 main()
 {
     readfile();
-    cAgent::display();
+    cAgent::displaySpec();
     AllocateSubjectsDays();
     AllocateTeachersToSubjects();
-    displayAssigns();
+    cAgent::displayWork();
     return 0;
 }

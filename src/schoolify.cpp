@@ -9,6 +9,7 @@
 
 #include "schoolify.h"
 
+cAgent::cAgent() {}
 cAgent::cAgent(const std::string &id)
     : myID(id)
 {
@@ -94,10 +95,16 @@ cAgent *cAgent::find(const std::string &id)
 }
 
 bool cAgent::cando(
+    int &daysWorked,
+    int &lecturesToday,
     const std::string &task,
     int day)
 {
-    if (ActualDaysWorked() >= myWorkDaysMax)
+    daysWorked = ActualDaysWorked();
+    lecturesToday = myWorkDaysActual[day];
+
+    if (daysWorked >= myWorkDaysMax &&
+        lecturesToday == 0)
         return false;
 
     if (!myAvailable[day])
@@ -108,10 +115,33 @@ bool cAgent::cando(
             task) == myTasks.end())
         return false;
 
+    // std::cout << "cando " << myID
+    //     << " " << day
+    //     << " ";
+    // for( int i : myWorkDaysActual )
+    //     std::cout << i << " ";
+    // std::cout << "\n";
+
     return true;
 }
 
-void cAgent::display()
+int cAgent::ActualDaysWorked() const
+{
+    int ret = 0;
+    for (int day = 0; day < 6; day++)
+        if (myWorkDaysActual[day] > 0)
+            ret++;
+    return ret;
+}
+int cAgent::totalLectures() const
+{
+    int ret = 0;
+    for (int day = 0; day < 6; day++)
+        ret += myWorkDaysActual[day];
+    return ret;
+}
+
+void cAgent::displaySpec()
 {
     std::cout << "Teachers:\n";
     for (auto &a : theDataStore.Agents)
@@ -121,6 +151,44 @@ void cAgent::display()
             std::cout << t << " ";
         std::cout << "\n";
     }
+}
+void cAgent::sort()
+{
+    std::sort(
+        theDataStore.Agents.begin(), theDataStore.Agents.end(),
+        [](const cAgent &a, const cAgent &b)
+        {
+            return a.myID < b.myID;
+        });
+}
+void cAgent::displayWork()
+{
+    for (auto &a : theDataStore.Agents)
+    {
+        std::cout << a.myID
+                  << " works " << a.ActualDaysWorked()
+                  << " days, " << a.totalLectures()
+                  << " total lectures\n";
+    }
+}
+bool cSubject::parseWeekly(const std::string &line)
+{
+    if (line.find("weeklyLectures:") == -1)
+        return false;
+    int p = line.find(":");
+    myWeeklyLectures = atoi(line.substr(p + 2).c_str());
+    myWeeklyUnassigned = myWeeklyLectures;
+    return true;
+}
+
+void cSubject::sort()
+{
+    std::sort(
+        theDataStore.Subjects.begin(), theDataStore.Subjects.end(),
+        [](const cSubject &a, const cSubject &b)
+        {
+            return a.myID < b.myID;
+        });
 }
 
 void readfile()
@@ -212,100 +280,127 @@ void readfile()
 void allocateMaxFlow()
 {
 
-    // loop over weekdays
-    for (int day = 0; day < 6; day++)
-    {
-        raven::graph::cGraph g;
-        g.directed();
+    // // loop over weekdays
+    // for (int day = 0; day < 6; day++)
+    // {
+    //     raven::graph::cGraph g;
+    //     g.directed();
 
-        // loop over the tasks
-        for (auto &task : theDataStore.Tasks)
-        {
-            // loop over agents
-            for (cAgent &a : theDataStore.Agents)
-            {
-                // check teacher can teach this subject
-                if (!a.cando(task, day))
-                    continue;
+    //     // loop over the tasks
+    //     for (auto &task : theDataStore.Tasks)
+    //     {
+    //         // loop over agents
+    //         for (cAgent &a : theDataStore.Agents)
+    //         {
+    //             // check teacher can teach this subject
+    //             if (!a.cando(task, day))
+    //                 continue;
 
-                // add link from agent to task agent is able to do
-                g.add(
-                    a.ID(),
-                    task);
-            }
-        }
+    //             // add link from agent to task agent is able to do
+    //             g.add(
+    //                 a.ID(),
+    //                 task);
+    //         }
+    //     }
 
-        // apply pathfinder maximum flow allocation algorithm
-        raven::graph::sGraphData gd;
-        gd.g = g;
-        auto sg = alloc(gd);
+    //     // apply pathfinder maximum flow allocation algorithm
+    //     raven::graph::sGraphData gd;
+    //     gd.g = g;
+    //     auto sg = alloc(gd);
 
-        const std::vector<std::string> daynames{"Sat", "Sun", "Mon", "Tue", "Wed", "Thr"};
-        std::cout << "\nAssignments for " << daynames[day] << ":\n";
-        for (std::pair<int, int> p : sg.edgeList())
-        {
-            auto teacherID = sg.userName(p.first);
-            auto *pt = cAgent::find(teacherID);
-            pt->incDaysWorked(day);
-            std::cout << "teacher " << teacherID
-                      << " assigned to " << sg.userName(p.second)
-                      << "\n";
-        }
-    }
+    //     const std::vector<std::string> daynames{"Sat", "Sun", "Mon", "Tue", "Wed", "Thr"};
+    //     std::cout << "\nAssignments for " << daynames[day] << ":\n";
+    //     for (std::pair<int, int> p : sg.edgeList())
+    //     {
+    //         auto teacherID = sg.userName(p.first);
+    //         auto *pt = cAgent::find(teacherID);
+    //         pt->incDaysWorked(day);
+    //         std::cout << "teacher " << teacherID
+    //                   << " assigned to " << sg.userName(p.second)
+    //                   << "\n";
+    //     }
+    // }
 }
 
 void allocateTeachers()
 {
 
-    // loop over weekdays
-    for (int day = 0; day < 6; day++)
-    {
-        raven::graph::cGraph g;
-        g.directed();
+    // // loop over weekdays
+    // for (int day = 0; day < 6; day++)
+    // {
+    //     raven::graph::cGraph g;
+    //     g.directed();
 
-        // loop over the tasks
-        for (auto &task : theDataStore.SubjectsPerDay[day])
-        {
-            // loop over agents
-            for (cAgent &a : theDataStore.Agents)
-            {
-                // check teacher can teach this subject
-                if (!a.cando(task, day))
-                    continue;
+    //     // loop over the tasks
+    //     for (auto &task : theDataStore.SubjectsPerDay[day])
+    //     {
+    //         // loop over agents
+    //         for (cAgent &a : theDataStore.Agents)
+    //         {
+    //             // check teacher can teach this subject
+    //             if (!a.cando(task, day))
+    //                 continue;
 
-                // add link from agent to task agent is able to do
-                g.add(
-                    a.ID(),
-                    task);
-            }
-        }
+    //             // add link from agent to task agent is able to do
+    //             g.add(
+    //                 a.ID(),
+    //                 task);
+    //         }
+    //     }
 
-        // apply pathfinder maximum flow allocation algorithm
-        raven::graph::sGraphData gd;
-        gd.g = g;
-        auto sg = alloc(gd);
+    //     // apply pathfinder maximum flow allocation algorithm
+    //     raven::graph::sGraphData gd;
+    //     gd.g = g;
+    //     auto sg = alloc(gd);
 
-        const std::vector<std::string> daynames{"Sat", "Sun", "Mon", "Tue", "Wed", "Thr"};
-        std::cout << "\nAssignments for " << daynames[day] << ":\n";
-        for (std::pair<int, int> p : sg.edgeList())
-        {
-            auto teacherID = sg.userName(p.first);
-            auto *pt = cAgent::find(teacherID);
-            pt->incDaysWorked(day);
-            std::cout << "teacher " << teacherID
-                      << " assigned to " << sg.userName(p.second)
-                      << "\n";
-        }
-    }
+    //     const std::vector<std::string> daynames{"Sat", "Sun", "Mon", "Tue", "Wed", "Thr"};
+    //     std::cout << "\nAssignments for " << daynames[day] << ":\n";
+    //     for (std::pair<int, int> p : sg.edgeList())
+    //     {
+    //         auto teacherID = sg.userName(p.first);
+    //         auto *pt = cAgent::find(teacherID);
+    //         pt->incDaysWorked(day);
+    //         std::cout << "teacher " << teacherID
+    //                   << " assigned to " << sg.userName(p.second)
+    //                   << "\n";
+    //     }
+    // }
 }
 
 void AllocateSubjectsDays()
 {
+    const int maxSubjectPerDay = 4;
+
     theDataStore.SubjectsPerDay.clear();
     theDataStore.SubjectsPerDay.resize(6, std::vector<std::string>(0));
-    for (auto &s : theDataStore.Subjects)
+    // for (auto &s : theDataStore.Subjects)
+    // {
+    //     for (int l = 0; l < s.weeklyLectures(); l++)
+    //     {
+    //         int minday = 0;
+    //         int minl = theDataStore.SubjectsPerDay[0].size();
+    //         for (int day = 0; day < 6; day++)
+    //         {
+    //             int sz = theDataStore.SubjectsPerDay[day].size();
+    //             if (sz < minl)
+    //             {
+    //                 minl = sz;
+    //                 minday = day;
+    //             }
+    //         }
+    //         theDataStore.SubjectsPerDay[minday].push_back(s.ID());
+    //     }
+    // }
+
+    // for (auto &s : theDataStore.Subjects)
+    //     std::cout << s.ID() << " ";
+    // std::cout << "\n";
+
+    for (auto iterS = theDataStore.Subjects.begin();
+         iterS != theDataStore.Subjects.end();
+         iterS++)
     {
-        for (int l = 0; l < s.weeklyLectures(); l++)
+        while (iterS->WeeklyUnassigned())
         {
             int minday = 0;
             int minl = theDataStore.SubjectsPerDay[0].size();
@@ -318,21 +413,29 @@ void AllocateSubjectsDays()
                     minday = day;
                 }
             }
-            theDataStore.SubjectsPerDay[minday].push_back(s.ID());
+
+            int lmax = iterS->WeeklyUnassigned();
+            if (lmax > maxSubjectPerDay)
+                lmax = maxSubjectPerDay;
+            for (int l = 0; l < lmax; l++)
+            {
+                theDataStore.SubjectsPerDay[minday].push_back(iterS->ID());
+                iterS->assign();
+            }
         }
     }
 
-    std::cout << "\nSubjects to days\n";
-    for (int day = 0; day < 6; day++)
-    {
-        std::cout
-            << theDataStore.daynames[day] << " ";
-        for (auto id : theDataStore.SubjectsPerDay[day])
-        {
-            std::cout << id << " ";
-        }
-        std::cout << "\n";
-    }
+    // std::cout << "\nSubjects to days\n";
+    // for (int day = 0; day < 6; day++)
+    // {
+    //     std::cout
+    //         << theDataStore.daynames[day] << " ";
+    //     for (auto id : theDataStore.SubjectsPerDay[day])
+    //     {
+    //         std::cout << id << " ";
+    //     }
+    //     std::cout << "\n";
+    // }
 }
 
 void AllocateTeachersToSubjects()
@@ -341,37 +444,68 @@ void AllocateTeachersToSubjects()
     theDataStore.AssignsPerDay.resize(6);
     for (int day = 0; day < 6; day++)
     {
-        for (auto &s : theDataStore.SubjectsPerDay[day])
-        {
-            for (auto &t : theDataStore.Agents)
-            {
-                if (!t.cando(s, day))
-                    continue;
-
-                theDataStore.AssignsPerDay[day].push_back(
-                    std::make_pair(t.ID(), s));
-            }
-        }
-    }
-}
-void displayAssigns()
-{
-    for (int day = 0; day < 6; day++)
-    {
         std::cout << "\n"
                   << theDataStore.daynames[day] << ":\n";
 
+        std::vector<std::string> vUnassigned;
+        for (auto &s : theDataStore.SubjectsPerDay[day])
+        {
+            // find teacher with least workload that can be assigned
+            cAgent *pbest;
+            std::pair<int, int> bestWorkload;
+            bestWorkload.first = INT_MAX;
+            bestWorkload.second = INT_MAX;
+            for (auto &t : theDataStore.Agents)
+            {
+                std::pair<int, int> workload;
+                if (!t.cando(
+                        workload.first, workload.second,
+                        s, day))
+                    continue;
+                if (workload.first >= bestWorkload.first)
+                    continue;
+                if (workload.second >= bestWorkload.second)
+                    continue;
+                bestWorkload = workload;
+                pbest = &t;
+            }
+            if (bestWorkload.first == INT_MAX)
+            {
+                vUnassigned.push_back(s);
+                continue;
+            }
+
+            theDataStore.AssignsPerDay[day].push_back(
+                std::make_pair(pbest->ID(), s));
+
+            pbest->incDaysWorked(day);
+        }
+        int c = 0;
         for (auto &va : theDataStore.AssignsPerDay[day])
         {
-            cAgent::find(va.first)->incDaysWorked(day);
-
+            if (c == 4)
+            {
+                std::cout << "\n";
+                c = 0;
+            }
             std::cout << va.first
-                      << " assigned to " << va.second
+                      << " assigned " << va.second
                       << ", ";
+            c++;
+        }
+        if (vUnassigned.size())
+        {
+            // std::cout << "\nUnassigned: ";
+            // for (auto &s : vUnassigned)
+            //     std::cout << s << " ";
+            // std::cout << "\n";
+
+            if (day < 5)
+            {
+                theDataStore.SubjectsPerDay[day + 1].insert(
+                    theDataStore.SubjectsPerDay[day + 1].begin(),
+                    vUnassigned.begin(), vUnassigned.end());
+            }
         }
     }
-    for(auto &t : theDataStore.Agents )
-        std::cout << t.ID() 
-            << " worked " << t.ActualDaysWorked()
-            << "\n";
 }

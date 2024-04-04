@@ -61,14 +61,14 @@ const teachers = [
     id: "T9",
     workDays: 4,
     unavailableDays:[],
-    subjects: ["M1"],
+    subjects: ["E1", "E2", "E3"],
   },
   {
     name: "Arabic-Teacher",
     id: "T10",
     workDays: 6,
     unavailableDays:[],
-    subjects: ["A1", "A2"],
+    subjects: ["A1", "A2", "A3"],
   },
 ];
 
