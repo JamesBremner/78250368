@@ -112,6 +112,9 @@ struct cAssign
           Subject(s)
     {
     }
+    static void TeachersToSubjects();
+
+    static void display();
 };
 
 struct sDataStore
@@ -128,7 +131,5 @@ extern sDataStore theDataStore;
 void readfile();
 
 void AllocateSubjectsDays();
-
-void AllocateTeachersToSubjects();
 
 void displayAssigns();

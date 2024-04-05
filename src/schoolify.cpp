@@ -94,7 +94,7 @@ cAgent *cAgent::find(const std::string &id)
 }
 
 bool cAgent::cando(
-    std::pair<int,int>& workload,
+    std::pair<int, int> &workload,
     const std::string &task,
     int day)
 {
@@ -275,8 +275,6 @@ void readfile()
     }
 }
 
-
-
 void AllocateSubjectsDays()
 {
     const int maxSubjectPerDay = 4;
@@ -330,7 +328,7 @@ void AllocateSubjectsDays()
     // }
 }
 
-void AllocateTeachersToSubjects()
+void cAssign::TeachersToSubjects()
 {
     theDataStore.AssignsPerDay.clear();
     theDataStore.AssignsPerDay.resize(6);
@@ -338,9 +336,6 @@ void AllocateTeachersToSubjects()
     // loop over the days
     for (int day = 0; day < 6; day++)
     {
-        std::cout << "\n"
-                  << theDataStore.daynames[day] << ":\n";
-
         // loop over the subjects assigned to this day
         std::vector<std::string> vUnassigned;
         for (auto &s : theDataStore.SubjectsPerDay[day])
@@ -378,23 +373,8 @@ void AllocateTeachersToSubjects()
             pbest->incDaysWorked(day);
         }
 
-        // display results
-        int c = 0;
-        for (auto &va : theDataStore.AssignsPerDay[day])
-        {
-            if (c == 4)
-            {
-                std::cout << "\n";
-                c = 0;
-            }
-            std::cout << va.Teacher
-                      << " assigned " << va.Subject
-                      << ", ";
-            c++;
-        }
-
-        // if possible, postpone subjects that were not assigned
-        // to the next day
+        // if possible, postpone to the next day
+        // subjects that were not assigned
         if (vUnassigned.size())
         {
             // std::cout << "\nUnassigned: ";
@@ -407,7 +387,35 @@ void AllocateTeachersToSubjects()
                 theDataStore.SubjectsPerDay[day + 1].insert(
                     theDataStore.SubjectsPerDay[day + 1].begin(),
                     vUnassigned.begin(), vUnassigned.end());
+            } else {
+                std::cout << "Unassigned: ";
+                for( auto& s : vUnassigned )
+                    std::cout << s << ", ";
+                std::cout << "\n";
             }
+        }
+    }
+
+    cAssign::display();
+}
+void cAssign::display()
+{
+    for (int day = 0; day < 6; day++)
+    {
+        std::cout << "\n"
+                  << theDataStore.daynames[day] << "\n";
+        int c = 0;
+        for (auto &va : theDataStore.AssignsPerDay[day])
+        {
+            if (c == 4)
+            {
+                std::cout << "\n";
+                c = 0;
+            }
+            std::cout << va.Teacher
+                      << " assigned " << va.Subject
+                      << ", ";
+            c++;
         }
     }
 }

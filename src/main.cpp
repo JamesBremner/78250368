@@ -16,7 +16,7 @@ main()
     readfile();
     cAgent::displaySpec();
     AllocateSubjectsDays();
-    AllocateTeachersToSubjects();
+    cAssign::TeachersToSubjects();
     cAgent::displayWork();
     return 0;
 }
